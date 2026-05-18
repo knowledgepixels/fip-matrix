@@ -1,0 +1,15 @@
+services:
+  fip-matrix:
+    # Override the published port if 8501 is already in use on the host.
+    #ports:
+    #  - "8080:8501"
+
+    environment:
+      # See https://docs.streamlit.io/develop/api-reference/configuration/config.toml
+      - STREAMLIT_SERVER_MAX_UPLOAD_SIZE=200
+      #- STREAMLIT_SERVER_BASE_URL_PATH=/fip-matrix
+      #- STREAMLIT_THEME_BASE=light
+
+    # Mount the project read-write to live-edit source without rebuilding.
+    #volumes:
+    #  - .:/app

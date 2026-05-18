@@ -1,0 +1,13 @@
+services:
+  fip-matrix:
+    build: .
+    image: fip-matrix:latest
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
