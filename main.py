@@ -15,16 +15,10 @@ df = load_and_prepare_data('./data/new_matrix.csv')
 princ = sorted(df['q'].dropna().unique())
 comm = sorted(df['c'].dropna().unique())
 
-col1, col2 = st.columns(2)
-with col1:
-    min_date, max_date = df['startdate'].min(), df['enddate'].max()
-    star = st.date_input('Start date', value=min_date, min_value=min_date, max_value=max_date)
-    fip_questions = st.multiselect('FIP questions:', options=princ, default=princ[:5])
-with col2:
-    end = st.date_input('End date', value=max_date, min_value=min_date, max_value=max_date)
-    communities = st.multiselect('Communities:', options=comm)
+fip_questions = st.multiselect('FIP questions:', options=princ, default=princ[:5])
+communities = st.multiselect('Communities:', options=comm)
 
-filtered_df = filter_data(df, star, end, fip_questions, communities)
+filtered_df = filter_data(df, fip_questions, communities)
 filtered_df = filtered_df.rename(columns={'q': 'FIP questions', 'reslabel': 'FAIR Supporting Resource', 'res_np': 'Link'})
 
 pivot_raw = pd.pivot_table(
