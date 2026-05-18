@@ -7,6 +7,13 @@ services:
       - "8501:8501"
     volumes:
       - ./data:/app/data
+    environment:
+      # Required when running behind a reverse proxy so the WebSocket
+      # handshake at /_stcore/stream is not rejected. Safe to leave off here
+      # because the app is read-only and has no forms or authentication;
+      # reconsider if either of those changes.
+      - STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION=false
+      - STREAMLIT_SERVER_ENABLE_CORS=false
     logging:
       options:
         max-size: "10m"
