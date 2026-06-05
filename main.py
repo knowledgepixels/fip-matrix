@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from config import COLOR_MAP, MATRIX_URL
-from utils import load_and_prepare_data, filter_data
+from utils import load_and_prepare_data, filter_data, latest_fip_per_community
 import base64
 from pathlib import Path
 
@@ -15,10 +15,46 @@ df = load_and_prepare_data(MATRIX_URL)
 princ = sorted(df['q'].dropna().unique())
 comm = sorted(df['c'].dropna().unique())
 
+# Show full labels in multiselect tags instead of Streamlit's truncated ellipsis
+st.markdown(
+    """
+    <style>
+      span[data-baseweb="tag"] {
+        max-width: none !important;
+        height: auto !important;
+      }
+      span[data-baseweb="tag"] span {
+        max-width: none !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        white-space: normal !important;
+      }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 fip_questions = st.multiselect('FIP questions:', options=princ, default=princ[:5])
 communities = st.multiselect('Communities:', options=comm)
 
-filtered_df = filter_data(df, fip_questions, communities)
+# --- FIP snapshot selector (scoped to the selected communities)
+# A community can have several FIPs (e.g. one per year). Picking a single
+# snapshot avoids the cross-version merge in the pivot below; selecting
+# multiple snapshots of one community still merges them (lowest status wins).
+scope = df[df['c'].isin(communities)] if communities else df
+fip_options = sorted(scope['fip_title'].dropna().unique())
+default_fips = latest_fip_per_community(scope) if communities else []
+selected_fips = st.multiselect(
+    'FIP versions:',
+    options=fip_options,
+    default=default_fips,
+    key=f"fips::{'|'.join(sorted(communities))}",
+    help='Which FIP snapshot(s) to show. Defaults to the latest per selected '
+         'community. Selecting several snapshots of one community merges them '
+         '(lowest declared status wins).'
+)
+
+filtered_df = filter_data(df, fip_questions, communities, selected_fips)
 filtered_df = filtered_df.rename(columns={'q': 'FIP questions', 'reslabel': 'FAIR Supporting Resource', 'res_np': 'Link'})
 
 pivot_raw = pd.pivot_table(

@@ -16,10 +16,22 @@ def map_relation_value(row):
     return None
 
 @st.cache_data
-def filter_data(df, fip_q=None, comms=None):
+def filter_data(df, fip_q=None, comms=None, fips=None):
     filtered = df
     if fip_q:
         filtered = filtered[filtered['q'].isin(fip_q)]
     if comms:
         filtered = filtered[filtered['c'].isin(comms)]
+    if fips:
+        filtered = filtered[filtered['fip_title'].isin(fips)]
     return filtered
+
+@st.cache_data
+def latest_fip_per_community(df):
+    """Return the most recent fip_title for each community (by declaration date)."""
+    t = df.dropna(subset=['fip_title', 'date'])
+    if t.empty:
+        return []
+    fip_dates = t.groupby(['c', 'fip_title'], as_index=False)['date'].max()
+    latest = fip_dates.sort_values('date').groupby('c', as_index=False).tail(1)
+    return sorted(latest['fip_title'].unique())
