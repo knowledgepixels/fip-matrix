@@ -1,3 +1,5 @@
+MATRIX_URL = "https://raw.githubusercontent.com/peta-pico/dsw-nanopub-api/main/tables/matrix.csv"
+
 AVAILABLE_MAP = {
     'https://w3id.org/fair/fip/terms/declares-current-use-of': 3,
     'https://w3id.org/fair/fip/terms/declares-planned-use-of': 2,

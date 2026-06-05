@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from config import COLOR_MAP
+from config import COLOR_MAP, MATRIX_URL
 from utils import load_and_prepare_data, filter_data
 import base64
 from pathlib import Path
@@ -8,8 +8,8 @@ from pathlib import Path
 st.set_page_config(layout="wide", page_title='FIP Matrix', page_icon='🔍')
 st.title('Interactive FIP Matrix')
 
-# --- Load data
-df = load_and_prepare_data('./data/new_matrix.csv')
+# --- Load data (live from upstream)
+df = load_and_prepare_data(MATRIX_URL)
 
 # --- Inputs
 princ = sorted(df['q'].dropna().unique())
