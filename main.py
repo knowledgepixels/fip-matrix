@@ -54,6 +54,14 @@ selected_fips = st.multiselect(
          '(lowest declared status wins).'
 )
 
+split_fips = st.checkbox(
+    'Show each FIP version as a separate column',
+    value=True,
+    help='When on, each selected FIP snapshot gets its own column, grouped under '
+         'its community. When off, snapshots of a community merge into one column '
+         '(lowest declared status wins).'
+)
+
 filtered_df = filter_data(df, fip_questions, communities, selected_fips)
 filtered_df = filtered_df.rename(columns={'q': 'FIP questions', 'reslabel': 'FAIR Supporting Resource', 'res_np': 'Link'})
 
@@ -61,10 +69,15 @@ pivot_raw = pd.pivot_table(
     filtered_df,
     values='mapped_values',
     index=['FIP questions', 'FAIR Supporting Resource', 'Link'],
-    columns='c',
+    columns=['c', 'fip_title'] if split_fips else 'c',
     aggfunc='min',
     fill_value=0
 )
+
+# st.dataframe doesn't support MultiIndex columns (renders each header with a
+# warning icon), so flatten the (community, fip_title) levels into one label.
+if isinstance(pivot_raw.columns, pd.MultiIndex):
+    pivot_raw.columns = [f"{c} — {fip}" for c, fip in pivot_raw.columns]
 
 def style_fip_matrix(val):
     return f"background-color: {COLOR_MAP.get(val, 'white')}; color: transparent;"
